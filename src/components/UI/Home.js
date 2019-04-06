@@ -1,11 +1,24 @@
 import React, {Component} from "react";
+import {NavLink} from "react-router-dom";
+import PigletItem from "../piglet/PigletItem";
+import {connect} from "react-redux";
+import {getPiglets} from "../../store/actions";
+import * as PropTypes from "prop-types";
+
+
 
 class Home extends Component {
 
+    componentDidMount() {
+        this.props.getPiglets();
+    }
+
     render() {
+
+        const {piglets} = this.props.piglet;
+
         return (
             <div className={"jumbotron"}>
-
                 <div className="container">
                     <div className="row">
                         <div className="col float-left">
@@ -13,25 +26,30 @@ class Home extends Component {
                         </div>
                         <div className="col">
                             <p className="lead float-right align-bottom">
-                                <a className="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+                                <NavLink className={"btn btn-outline-dark"} to={"/newPiglet"}>new piglet</NavLink>
                             </p>
                         </div>
                     </div>
                 </div>
                 <hr className="my-4" />
-                <div className="card">
-                    <h5 className="card-header">Featured</h5>
-                    <div className="card-body">
-                        <h5 className="card-title">Special title treatment</h5>
-                        <p className="card-text">With supporting text below as a natural lead-in to additional
-                            content.</p>
-                        <a href="#" className="btn btn-primary">Go somewhere</a>
+                {piglets.map(piglet => (
+                    <div>
+                        <PigletItem pigletItem={piglet}/>
+                        <br/>
                     </div>
-                </div>
-
+                ))}
             </div>
         );
     }
 }
 
-export default Home;
+Home.propTypes = {
+    piglet: PropTypes.object.isRequired,
+    getPiglets: PropTypes.func.isRequired
+};
+
+const mapStateToProps = state => ({
+    piglet: state.piglet
+});
+
+export default connect(mapStateToProps, {getPiglets})(Home);
