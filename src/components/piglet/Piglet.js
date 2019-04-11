@@ -7,17 +7,28 @@ import Execution from "./execution/Execution";
 import * as PropTypes from "prop-types";
 import {connect} from "react-redux";
 import {getCBTs} from "../../store/actions/cbt";
-import {COMPOSING, EXECUTING, NEGOTIATING, PROVISIONING, QUALITY_ASSURANCE, SCHEDULED} from "../../cbtStates";
+import {
+    COMPOSING, COMPOSITION,
+    EXECUTING,
+    EXECUTION,
+    NEGOTIATING,
+    PROVISIONING,
+    QUALITY_ASSURANCE,
+    SCHEDULED
+} from "../../cbtStates";
+import ExecutionInstance from "./execution/ExecutionInstance";
 
 class Piglet extends Component{
 
     state = {
-        value: "1"
+        value: "1",
+        piglet: null
     };
 
+
     componentDidMount() {
-        const {piglet} = this.props.piglet;
-        this.props.getCBTs(piglet.id);
+        const {id} = this.props.match.params;
+        this.props.getCBTs(id);
     }
 
     handleChange = (event, value) => {
@@ -26,8 +37,8 @@ class Piglet extends Component{
     render(){
 
         const { value } = this.state;
-        const { collectiveBasedTasks } = this.props.cbt;
-        const {piglet} = this.props.piglet;
+        const { cbts } = this.props.cbt;
+        const {piglet} = this.props.cbt;
         let scheduled = [];
         let provisioning = [];
         let composing = [];
@@ -36,11 +47,12 @@ class Piglet extends Component{
         let qualityAssurance = [];
         let finished = [];
 
-        collectiveBasedTasks.map(cbt => {
+        cbts.map(cbt => {
+            console.log(cbt.state);
             let task = (
                 <div className={"row"}>
                     <div className={"col"}>
-                        <Execution cbt = {cbt}/>
+                        <Execution execution = {cbt}/>
                     </div>
                 </div>
             );
@@ -51,13 +63,13 @@ class Piglet extends Component{
                 case PROVISIONING:
                     provisioning.push(task);
                     break;
-                case COMPOSING:
+                case COMPOSITION:
                     composing.push(task);
                     break;
                 case NEGOTIATING:
                     negotiating.push(task);
                     break;
-                case EXECUTING:
+                case EXECUTION:
                     executing.push(task);
                     break;
                 case QUALITY_ASSURANCE:
@@ -76,8 +88,8 @@ class Piglet extends Component{
                         <div className="col">
                             <div className="card" style={{borderRadius: "5px 5px 0px 0px", backgroundColor: "#263238"}}>
                                 <div className="card-body">
-                                    <h5 className="card-title" style={{color: "#AA00FF"}}>{piglet.name}</h5>
-                                    <p className="card-text" style={{color: "#D500F9"}}>{piglet.description}</p>
+                                    <h5 className="card-title" style={{color: "#AA00FF"}}>{piglet ? piglet.name : null}</h5>
+                                    <p className="card-text" style={{color: "#D500F9"}}>{piglet ? piglet.description : null}</p>
                                     <p className="lead align-bottom">
                                         <NavLink to={"/cbt"} className="btn btn-outline-warning">new Collective Based Task</NavLink>
                                     </p>
@@ -106,7 +118,9 @@ class Piglet extends Component{
                                     </Tabs>
                                 </AppBar>
                                 <br/>
-                                {value === '1' && <div> {scheduled} </div>}
+                                {value === '1' && <div>
+                                    {scheduled}
+                                </div>}
 
                                 {value === '2' && <div>
                                     {provisioning}

@@ -2,17 +2,19 @@ import {GET_CBTs} from "../actions/actionTypes";
 
 
 const initialState = {
-    collectiveBasedTasks: [],
-    pigletId: ""
+    cbts: [],
+    piglet: null
 };
 
 export default function (state = initialState, action) {
+    console.log(action);
     switch (action.type) {
+
         case GET_CBTs:
             return {
                 ...state,
-                collectiveBasedTasks: action.payload,
-                pigletId: action.pigletId
+                cbts: action.payload.cbts,
+                piglet: action.payload.piglet
             };
         default:
             return initialState;

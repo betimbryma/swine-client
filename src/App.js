@@ -26,9 +26,9 @@ class App extends Component {
                     <Route path={"/newPiglet"} component={NewPiglet}/>
                     <Route path={"/piglet/:id"} component={Piglet}/>
                     <Route path={"/cbt"} component={CollectiveBasedTask}/>
-                    <Route path={"/qualityAssurance"} component={QualityAssurance}/>
-                    <Route path={"/negotiation"} component={Negotiation}/>
-                    <Route path={"/Execution"} component={ExecutionInstance}/>
+                    <Route path={"/qualityAssurance/:id"} component={QualityAssurance}/>
+                    <Route path={"/negotiation/:id"} component={Negotiation}/>
+                    <Route path={"/execution/:id"} component={ExecutionInstance}/>
                     <Route path={"/profile"} component={Peer}/>
                     <Route path={"/"} component={Home}/>
                     <Redirect to={"/"}/>

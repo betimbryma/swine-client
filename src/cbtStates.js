@@ -1,7 +1,9 @@
 export const SCHEDULED = "SCHEDULED";
 export const PROVISIONING = "PROVISIONING";
-export const COMPOSING = "COMPOSING";
+export const COMPOSITION = "COMPOSITION";
 export const NEGOTIATING = "NEGOTIATING";
-export const EXECUTING = "EXECUTING";
+export const EXECUTION = "EXECUTION";
 export const QUALITY_ASSURANCE = "QUALITY_ASSURANCE";
 export const FINISHED = "FINISHED";
+export const FAILED = "FAILED";
+export const CANCELLED = "CANCELLED";

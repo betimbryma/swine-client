@@ -3,7 +3,6 @@ import FormGroup from "@material-ui/core/FormGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
 import moment from "moment";
-import Radio from "@material-ui/core/Radio";
 import axios from "axios";
 import { DateTimePicker } from "material-ui-pickers";
 import MomentUtils from '@date-io/moment'
@@ -23,20 +22,11 @@ class CollectiveBasedTask extends Component {
         negotiationTimeout: 0,
         executionTimeout: 0,
         qualityAssuranceTimeout: 0,
-        qualityAssurance: false,
-        ether: 0,
-        newCollective: false,
-        privateKey: "",
-        qaCollective: true,
-        unit: "ether",
         queries: [{key: "", value: ""}],
+        qaQueries: [{key: "", value: ""}],
         qor: 0,
-        quantity: 0
+        pigletId: -1
     };
-
-    componentDidMount() {
-        this.setState({pigletId: this.props.cbt.pigletId})
-    }
 
     onChange = (event) => {
         this.setState({[event.target.name]: event.target.value});
@@ -60,6 +50,8 @@ class CollectiveBasedTask extends Component {
 
     onSubmit = () => {
         const dto = {...this.state};
+        dto.pigletId = this.props.cbt.piglet.id;
+        dto.start = Math.floor(((dto.startDate - new Date()) /1000)/60)
         axios.post("/api/execution/save", dto)
             .then(() => {
                 this.props.history.push("/");
@@ -68,24 +60,24 @@ class CollectiveBasedTask extends Component {
         })
     };
 
-    removeQuery = (index) => {
-        let queries = [...this.state.queries];
-        queries.splice(index,1);
-        this.setState({queries: queries});
+    removeQuery = (queries, index) => {
+        let queriesCopy = [...this.state[[queries]]];
+        queriesCopy.splice(index,1);
+        this.setState({[queries]: queriesCopy});
     };
 
-    newQuery = () => {
-        let queries = [...this.state.queries];
-        queries.push({key: "", value: ""});
-        this.setState({queries: queries});
+    newQuery = (queryName) => {
+        let queriesCopy = [...this.state[[queryName]]];
+        queriesCopy.push({key: "", value: ""});
+        this.setState({[queryName]: queriesCopy});
     };
 
-    queryUpdate = (event, index) => {
-        let queries = [...this.state.queries];
+    queryUpdate = (event, index, queryName) => {
+        let queries = [...this.state[[queryName]]];
         let query = queries[index];
 
         query[event.target.name] = event.target.value;
-        this.setState({queries: queries});
+        this.setState({[queryName]: queries});
     };
 
     render() {
@@ -117,7 +109,8 @@ class CollectiveBasedTask extends Component {
                                     <DateTimePicker
                                         value={this.state.startDate}
                                         onChange={(event) => this.onDateChange(event)}
-                                        helperText="Clear Initial State"
+                                        helperText="Start date and time"
+
                                         disablePast
                                         name={"startDate"}
                                     />
@@ -192,19 +185,19 @@ class CollectiveBasedTask extends Component {
                                         <div className="input-group" key={index} style={{marginTop: "5px"}}>
                                             <div className="input-group-prepend">
                                                 <input type={"text"} className="input-group-text" placeholder={"key"} value={query.key} name={"key"}
-                                                       onChange={(event) => this.queryUpdate(event, index)}/>
+                                                       onChange={(event) => this.queryUpdate(event, index, "queries")}/>
                                             </div>
                                             <input type={"text"} className={"form-control"} placeholder={"value"} value={query.value}
-                                                   name={"value"} onChange={(event) => this.queryUpdate(event, index)}/>
+                                                   name={"value"} onChange={(event) => this.queryUpdate(event, index, "queries")}/>
                                             <div className="input-group-append">
-                                                <button className={"float-right btn btn-outline-danger btn-sm"} onClick={() => this.removeQuery(index)}>x</button>
+                                                <button className={"float-right btn btn-outline-danger btn-sm"} onClick={() => this.removeQuery("queries", index)}>x</button>
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
                             <br/>
-                            <button className={"float-right btn btn-outline-dark"} onClick={this.newQuery}>new Query</button>
+                            <button className={"float-right btn btn-outline-dark"} onClick={() => this.newQuery("queries")}>new Query</button>
                         </div>
                     </div>
                     <hr/>
@@ -213,22 +206,9 @@ class CollectiveBasedTask extends Component {
                             <h2>Quality Assurance</h2>
                         </div>
                     </div>
+
                     <div className="row">
-                        <div className="col">
-                            <FormControlLabel value="a" control={<Radio
-                                checked={!this.state.qaCollective}
-                                onChange={() => this.setState({qaCollective: false})}
-                                name="qaCollective"
-                            />} label="the user will do the quality assurance" />
-                            <FormControlLabel value="b" control={<Radio
-                                checked={this.state.qaCollective}
-                                onChange={() => this.setState({qaCollective: true})}
-                                name="qaCollective"
-                            />} label="create a separate CBT" />
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col">
+                        <div className="col-4">
                             <div className="input-group">
                                 <div className="input-group-prepend">
                                     <span className="input-group-text">QoR</span>
@@ -237,28 +217,31 @@ class CollectiveBasedTask extends Component {
                                        name={"qor"} onChange={(event) => this.onChange(event)}/>
                             </div>
                         </div>
-                        <div className="col">
-                            <div className="input-group mb-3">
-                                <div className="input-group-prepend">
-                                    <span className="input-group-text">Ξ</span>
-                                </div>
-                                <input type="text" className="form-control" name={"quantity"} onChange={(event) => this.onChange(event)}/>
-                                <div className="input-group-prepend">
-                                    <span className="input-group-text">wei</span>
-                                </div>
-                        </div>
-                        </div>
-                        <div className="col">
-                            <div className="input-group">
-                                <div className="input-group-prepend">
-                                    <span className="input-group-text">private key</span>
-                                </div>
-                                <input type={"password"} className={"form-control"} placeholder={"enter your private key here"}
-                                       name={"privateKey"} onChange={(event) => this.onChange(event)}/>
-                            </div>
-                        </div>
-                    </div>
 
+                        <div className="col-8">
+                            <div style={{height: "100px", overflowY: "auto"}}>
+                                {this.state.qaQueries.map((query, index) => {
+                                    return (
+                                        <div className="input-group" key={index} style={{marginTop: "5px"}}>
+                                            <div className="input-group-prepend">
+                                                <input type={"text"} className="input-group-text" placeholder={"key"} value={query.key} name={"key"}
+                                                       onChange={(event) => this.queryUpdate(event, index, "qaQueries")}/>
+                                            </div>
+                                            <input type={"text"} className={"form-control"} placeholder={"value"} value={query.value}
+                                                   name={"value"} onChange={(event) => this.queryUpdate(event, index, "qaQueries")}/>
+                                            <div className="input-group-append">
+                                                <button className={"float-right btn btn-outline-danger btn-sm"} onClick={() => this.removeQuery("qaQueries", index)}>x</button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <br/>
+                            <button className={"float-right btn btn-outline-dark"} onClick={() => this.newQuery("qaQueries")}>new Query</button>
+                        </div>
+
+                    </div>
+                    <hr/>
                     <div className="row mt-4 align-right">
                         <div className="col align-right">
                             <button onClick={this.onSubmit} className={"float-right btn btn-dark btn-lg"}>save</button>

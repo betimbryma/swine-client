@@ -16,7 +16,6 @@ export const authenticate = (peer, process, history) => async dispatch => {
                     peer: decoded.id,
                     token: token
                 });
-                history.push("/home");
             }
         });
 

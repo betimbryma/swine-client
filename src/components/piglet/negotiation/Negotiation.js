@@ -5,28 +5,30 @@ class Negotiation extends Component {
 
     state = {
         id: "",
-        name: "Name",
+        name: "Are you interested to participate in this task?",
         done: false,
-        taskRequest: "Task request",
-        agreed: false
+        taskRequest: "",
+        agreed: false,
+        missing: false
     };
 
     componentDidMount() {
         const {id} = this.props.match.params;
         axios.get(`/api/negotiation/${id}`)
             .then(res => {
-                const {neg} = res.data;
-                this.setState({id: neg.id, name: neg.name, done: neg.done, taskRequest: neg.taskRequest
+                const neg = res.data;
+                console.log(neg);
+                this.setState({id: neg.negotiationID, done: neg.done, taskRequest: neg.taskRequest
                     , agreed: neg.agreed});
             }).catch(e => {
-                console.log(e);
+                this.setState({name: "Negotiation not found", missing: true})
         });
     };
 
     onSubmit = (agree) => {
         this.setState({agree: agree});
-        axios.post("/api/negotiation",
-            {id: this.state.id, agree: agree})
+        axios.post("/api/negotiation/negotiate",
+            {id: this.state.id, agreed: agree})
             .then(() => {
                 this.setState({done: true});
             }).catch(e => {
@@ -48,12 +50,19 @@ class Negotiation extends Component {
                     </div>
                 </div>
                 <div className="row">
-                    <div className="col">
-                        <button type="button" className={`btn btn-outline-success float-right ${(this.state.done && this.state.agreed) ? "btn-success" : ""}`}
-                            style={{marginLeft: "5px", marginTop: "10px"}} onClick={() => this.onSubmit(true)}>Participate</button>
-                        <button type="button" className={`btn btn-outline-danger float-right ${(this.state.done && !this.state.agreed) ? "btn-danger" : ""}`}
-                                style={{marginTop: "10px"}} onClick={() => this.onSubmit(false)}>Decline</button>
-                    </div>
+                    {!this.state.missing ?
+                        <div className="col">
+                            <button type="button" disabled={this.state.done}
+                                    className={`btn float-right ${(this.state.done && this.state.agreed) ? "btn-success" : "btn-outline-success"}`}
+                                    style={{marginLeft: "5px", marginTop: "10px"}}
+                                    onClick={() => this.onSubmit(true)}>Participate
+                            </button>
+                            <button type="button" disabled={this.state.done}
+                                    className={`btn float-right ${(this.state.done && !this.state.agreed) ? "btn-danger" : "btn-outline-danger"}`}
+                                    style={{marginTop: "10px"}} onClick={() => this.onSubmit(false)}>Decline
+                            </button>
+                        </div> : null
+                    }
                 </div>
             </div>
         );

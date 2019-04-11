@@ -4,29 +4,32 @@ import axios from "axios";
 class QualityAssurance extends Component {
 
     state = {
-        name: "",
-        taskResult: "",
+        name: "Please rate the task result of a collective based task",
+        taskRequest: "",
         score: 0,
-        done: false,
-        id: ""
+        voted: false,
+        results: [],
+        id: "",
+        disabled: true
     };
 
     componentDidMount() {
         const {id} = this.props.match.params;
         axios.get(`/api/qualityassurance/${id}`)
             .then(res => {
-                const {qa} = res.data;
-                this.setState({name: qa.name, taskResult: qa.name, score: qa.score, done: qa.done, id: qa.id});
+                const qa = res.data;
+                this.setState({name: qa.name, taskRequest: qa.taskRequest,
+                    disabled: qa.voted, score: qa.score, done: qa.done, id: qa.qualityAssuranceId});
             }).catch(e => {
-                console.log(e);
+                this.setState({name: "Oops, you are not part of the collective."});
         });
     };
 
     onSubmit = () => {
         axios.post("/api/qualityassurance/",
-            {id: this.state.id, score: this.state.score})
+            {id: this.state.id, vote: this.state.score})
             .then(() => {
-                this.setState({done: true})
+                this.setState({disabled: true})
             }).catch(e => {
                 console.log(e);
         })
@@ -44,7 +47,8 @@ class QualityAssurance extends Component {
                         <h5 className="card-title">{this.state.name}</h5>
                         <div className="input-group mb-3">
 
-                            <textarea className="form-control" placeholder="Amount in ether" readOnly value={this.state.taskResult}/>
+                            <textarea className="form-control" readOnly value={this.state.taskRequest}
+                                style={{height: "250px"}}/>
                             <div className="input-group-prepend">
                                 <span className="input-group-text">rate this Task Result</span>
                             </div>
@@ -67,7 +71,7 @@ class QualityAssurance extends Component {
                                 </div>
                             </div>
                         </div>
-                        <button onClick={this.onSubmit} disabled={this.state.done} className="btn float-right btn-outline-dark">send</button>
+                        <button onClick={this.onSubmit} disabled={this.state.disabled} className="btn float-right btn-outline-dark">send</button>
                     </div>
                 </div>
             </div>

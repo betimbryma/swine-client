@@ -5,9 +5,9 @@ class ExecutionInstance extends Component {
 
     state = {
         id: "",
-        name: "name",
-        taskRequest: "task request",
-        taskResult: "",
+        name: "collective based task",
+        request: "task request",
+        result: "",
         done: false
     };
 
@@ -15,21 +15,28 @@ class ExecutionInstance extends Component {
         const {id} = this.props.match.params;
         axios.get(`/api/execution/${id}`)
             .then(res => {
-                const {exec} = res.data;
-                this.setState({id: exec.id, name: exec.name, taskRequest: exec.taskRequest});
+                const exec = res.data;
+                console.log(exec);
+                this.setState({id: exec.executionId, name: exec.name, request: exec.request,
+                    result: exec.result, done: exec.done});
+                console.log(this.state.id);
             }).catch(e => {
-                console.log(e);
+                this.setState({done: true, name: "collective based task not found", request: ""});
         });
     };
 
     onSubmit = () => {
-        axios.post("/api/execution/",
-            {id: this.state.id, taskResult: this.state.taskResult})
+        axios.post("/api/execution/execute",
+            {executionId: this.state.id, result: this.state.result})
             .then(() => {
                 this.setState({done: true});
             }).catch(e => {
                 console.log(e);
         });
+    };
+
+    onChange = (event) => {
+        this.setState({result: event.target.value});
     };
 
     render() {
@@ -39,12 +46,13 @@ class ExecutionInstance extends Component {
                     <div className="card">
                         <div className="card-body">
                             <h5 className="card-title">{this.state.name}</h5>
-                            <p className="card-text">{this.state.taskRequest}</p>
+                            <p className="card-text">{this.state.request}</p>
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
                                     <span className="input-group-text">Task Result</span>
                                 </div>
-                                <textarea className="form-control" placeholder="Amount in ether" readOnly={!this.state.done}/>
+                                <textarea className="form-control" value={this.state.result} readOnly={this.state.done}
+                                onChange={(e) => this.onChange(e)}/>
                             </div>
                             <button className="btn float-right btn-outline-dark"
                                     disabled={this.state.done} onClick={this.onSubmit}>send</button>
