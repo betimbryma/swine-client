@@ -45,17 +45,32 @@ class Piglet extends Component{
         let negotiating = [];
         let executing = [];
         let qualityAssurance = [];
+        let scheduledDone = [];
+        let provisioningDone = [];
+        let composingDone = [];
+        let negotiatingDone = [];
+        let executingDone = [];
+        let qualityAssuranceDone = [];
         let finished = [];
 
         cbts.map(cbt => {
-            console.log(cbt.state);
+            console.log(cbt);
             let task = (
                 <div className={"row"}>
                     <div className={"col"}>
-                        <Execution execution = {cbt}/>
+                        <Execution execution = {cbt} done={false}/>
                     </div>
                 </div>
             );
+
+            let finishedTask = (
+                <div className={"row"}>
+                    <div className={"col"}>
+                        <Execution execution = {cbt} done={true}/>
+                    </div>
+                </div>
+            );
+
             switch (cbt.state) {
                 case SCHEDULED:
                     scheduled.push(task);
@@ -78,8 +93,24 @@ class Piglet extends Component{
                 default:
                     finished.push(task);
             }
-            return task;
+
+            if(cbt.scheduled && cbt.state !== SCHEDULED)
+                scheduledDone.push(finishedTask);
+            if(cbt.negotiation && cbt.state !== NEGOTIATING)
+                negotiatingDone.push(finishedTask);
+            if(cbt.provisioning && cbt.state !== PROVISIONING)
+                provisioningDone.push(finishedTask);
+            if(cbt.composition && cbt.state !== COMPOSITION)
+                composingDone.push(finishedTask);
+            if(cbt.execution && cbt.state !== EXECUTION)
+                executingDone.push(finishedTask);
+            if(cbt.qualityAssurance && cbt.state !== QUALITY_ASSURANCE)
+                qualityAssuranceDone.push(finishedTask);
+
+            return cbt;
         });
+
+
 
         return(
             <div className={"jumbotron"}>
@@ -110,7 +141,7 @@ class Piglet extends Component{
                                           textColor="primary">
                                         <Tab value={"1"} label="scheduled" />
                                         <Tab value={"2"} label="provisioning" />
-                                        <Tab value={"3"} label="composing" />
+                                        <Tab value={"3"} label="composition" />
                                         <Tab value={"4"} label="negotiating" />
                                         <Tab value={"5"} label="executing" />
                                         <Tab value={"6"} label="quality assurance" />
@@ -120,22 +151,28 @@ class Piglet extends Component{
                                 <br/>
                                 {value === '1' && <div>
                                     {scheduled}
+                                    {scheduledDone}
                                 </div>}
 
                                 {value === '2' && <div>
                                     {provisioning}
+                                    {provisioningDone}
                                 </div>}
                                 {value === '3' && <div>
                                     {composing}
+                                    {composingDone}
                                 </div>}
-                                {value === '4' && <div>{
-                                    negotiating
-                                }</div>}
+                                {value === '4' && <div>
+                                    {negotiating}
+                                    {negotiatingDone}
+                                </div>}
                                 {value === '5' && <div>
                                     {executing}
+                                    {executingDone}
                                 </div>}
                                 {value === '6' && <div>
                                     {qualityAssurance}
+                                    {qualityAssuranceDone}
                                 </div>}
                                 {value === '7' && <div>
                                     {finished}
